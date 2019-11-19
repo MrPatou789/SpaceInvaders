@@ -59,8 +59,11 @@ class Fighter extends UFO {
 }
 
 class Missile extends UFO {
-    constructor() {
+    constructor(id, x) {
         super()
+        this._id = id
+        this._y = 28
+        this._x = x
     }
 }
 
@@ -68,7 +71,8 @@ class Missile extends UFO {
 var M = {
     fighter: null,
     aliens: [],
-    missiles: []
+    missiles: [],
+    indexMissiles : 0,
 }
 
 var V = {
@@ -79,7 +83,7 @@ var V = {
         const template = document.getElementById('alien')
         const clone = document.importNode(template.content, true);
         const div = clone.querySelector("div")
-        div.setAttribute('data', id)
+        div.setAttribute('data-id', id)
 
         aliens.appendChild(clone);
     },
@@ -98,17 +102,38 @@ var V = {
             element.style.left = `${spaceship.x}px`
     },
 
+    displayMissile : function(fighter, id){
+        const game = document.getElementById('game')
+        const img = document.createElement('img')
+        img.classList.add('missile')
+        img.setAttribute('data-id', id)
+        img.style.left = `${fighter.x + 5}px`
+        img.style.bottom = '28px'
+        img.src = './assets/images/missile.png'
+
+        game.appendChild(img)
+    },
+
+    removeMissile : function(div){
+        const game = document.getElementById('game')
+        game.removeChild(div)
+    },
+
     defineKeyUpEventListener : function(){
-        document.addEventListener('keydown', e => {
+        document.addEventListener('keyup', e => {
             if(e.key === 'ArrowRight' || e.key === 'ArrowLeft'){
                 C.movefighter(e.key)
+            }
+            if(e.key === 'ArrowUp'){
+                C.addMissile()
             }
         })
     },
 
-    step : function () {
+    step : function (missiles) {
         requestAnimationFrame(function () {
             const aliens = document.getElementById('aliens')
+            // console.log(missiles)
             if (V.direction === 'right' && parseInt(aliens.style.marginRight) > 0) {
                 aliens.style.marginLeft = `${parseInt(aliens.style.marginLeft) + 1}px`
                 aliens.style.marginRight = `${parseInt(aliens.style.marginRight) - 1}px`
@@ -128,8 +153,20 @@ var V = {
                 }
                 V.direction = 'right'
             }
+            if(missiles.length){
+                missiles.forEach(element => {
+                    let div = Array.from(document.querySelectorAll('.missile')).filter(missile => +missile.getAttribute('data-id') === element.id)
+                    if(element.y + 5 < 780){
+                        element.y = element.y + 5
+                        div[0].style.bottom = `${element.y}px`
+                    }else{
+                        C.removeMissile(element, div[0])
+                    }
+
+                });
+            }
             
-            V.step()
+            V.step(missiles)
         });
     },
 }
@@ -147,12 +184,23 @@ var C = {
         V.defineKeyUpEventListener()
 
         requestAnimationFrame(function () {
-            V.step()
+            V.step(M.missiles)
         });
     },
 
     movefighter : function(key){
         V.movefighter(key , M.fighter)
+    },
+
+    addMissile : function (){
+        const id = M.indexMissiles++
+        M.missiles.push(new Missile(id, M.fighter.x + 5))
+        V.displayMissile(M.fighter, id)
+    },
+
+    removeMissile : function (element, div){
+        V.removeMissile(div)
+        M.missiles.splice( M.missiles.indexOf(element), 1);
     }
 }
 

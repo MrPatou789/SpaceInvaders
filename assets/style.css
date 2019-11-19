@@ -38,3 +38,9 @@ body {
   height: 30px;
 }
 
+.missile{
+  position: absolute;
+  width: 20px;
+  height: auto;
+}
+
