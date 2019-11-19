@@ -1,32 +1,40 @@
-body{
-    margin: 0;
-    height: 100vh;
-    width: 100%;
-    background-color: black;
-    display: flex;
-    justify-content: center;
-    align-items: center;
+body {
+  margin: 0;
+  height: 100vh;
+  width: 100%;
+  background-color: black;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
-#game{
-    position: relative;
-    height: 780px;
-    width: 1024px;
-    background-color: lightgray;
+#game {
+  position: relative;
+  height: 780px;
+  width: 1024px;
 }
 
-#aliens{
-    display: flex;
-    flex-wrap: wrap;
-    position: relative;
+#aliens {
+  display: flex;
+  flex-wrap: wrap;
+  position: relative;
 }
 
-.alien_normal{
-    position: relative;
-    margin: 0 5px;
+.alien_normal {
+  position: relative;
+  margin: 0 5px;
 }
 
-.alien_normal img{
-    width: 30px;
-    height: 30px;
+.alien_normal img {
+  width: 30px;
+  height: 30px;
+  color: blue;
 }
+
+#fighter {
+  position: absolute;
+  bottom: 0;
+  width: 30px;
+  height: 30px;
+}
+

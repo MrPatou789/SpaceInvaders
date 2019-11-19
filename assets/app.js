@@ -3,8 +3,6 @@ class UFO {
         this._id = null,
             this._x = null,
             this._y = null,
-            this._height = null,
-            this._width = null,
             this._status = true
     }
 
@@ -55,6 +53,8 @@ class Alien extends UFO {
 class Fighter extends UFO {
     constructor() {
         super()
+        this._y = 780
+        this._x = 512
     }
 }
 
@@ -84,8 +84,29 @@ var V = {
         aliens.appendChild(clone);
     },
 
+    movefighter: function(key, spaceship){
+            const element = document.getElementById('fighter')
+            if(key === 'ArrowRight'){
+                if(spaceship.x + 15 < 1024){
+                    spaceship.x += 15
+                }
+            }else{
+                if(spaceship.x - 15 > 0){
+                    spaceship.x -= 15
+                }
+            }
+            element.style.left = `${spaceship.x}px`
+    },
 
-    step: function () {
+    defineKeyUpEventListener : function(){
+        document.addEventListener('keydown', e => {
+            if(e.key === 'ArrowRight' || e.key === 'ArrowLeft'){
+                C.movefighter(e.key)
+            }
+        })
+    },
+
+    step : function () {
         requestAnimationFrame(function () {
             const aliens = document.getElementById('aliens')
             if (V.direction === 'right' && parseInt(aliens.style.marginRight) > 0) {
@@ -121,9 +142,17 @@ var C = {
 
         }
 
+        M.fighter = new Fighter()
+
+        V.defineKeyUpEventListener()
+
         requestAnimationFrame(function () {
             V.step()
         });
+    },
+
+    movefighter : function(key){
+        V.movefighter(key , M.fighter)
     }
 }
 
