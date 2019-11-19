@@ -9,7 +9,24 @@ body{
 }
 
 #game{
+    position: relative;
     height: 780px;
     width: 1024px;
     background-color: lightgray;
+}
+
+#aliens{
+    display: flex;
+    flex-wrap: wrap;
+    position: relative;
+}
+
+.alien_normal{
+    position: relative;
+    margin: 0 5px;
+}
+
+.alien_normal img{
+    width: 30px;
+    height: 30px;
 }
