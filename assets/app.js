@@ -62,8 +62,6 @@ class Missile extends UFO {
     constructor(id, x) {
         super()
         this._id = id
-        this._y = 28
-        this._x = x
     }
 }
 
@@ -130,50 +128,62 @@ var V = {
         })
     },
 
-    step : function (missiles) {
+    step : function () {
         requestAnimationFrame(function () {
-            const aliens = document.getElementById('aliens')
-            // console.log(missiles)
-            if (V.direction === 'right' && parseInt(aliens.style.marginRight) > 0) {
-                aliens.style.marginLeft = `${parseInt(aliens.style.marginLeft) + 1}px`
-                aliens.style.marginRight = `${parseInt(aliens.style.marginRight) - 1}px`
-            }else{
-                if( V.direction === 'right'){
-                    aliens.style.marginTop = `${parseInt(aliens.style.marginTop) + 20}px`
-                }
-                V.direction = 'left'
-            }
+            // const aliensDiv = document.getElementById('aliens')
+            // if (V.direction === 'right' && parseInt(aliensDiv.style.marginRight) > 0) {
+            //     aliensDiv.style.marginLeft = `${parseInt(aliensDiv.style.marginLeft) + 1}px`
+            //     aliensDiv.style.marginRight = `${parseInt(aliensDiv.style.marginRight) - 1}px`
+            // }else{
+            //     if( V.direction === 'right'){
+            //         aliensDiv.style.marginTop = `${parseInt(aliensDiv.style.marginTop) + 20}px`
+            //     }
+            //     V.direction = 'left'
+            // }
 
-            if (V.direction === 'left' && parseInt(aliens.style.marginLeft) > 0) {
-                aliens.style.marginLeft = `${parseInt(aliens.style.marginLeft) - 1}px`
-                aliens.style.marginRight = `${parseInt(aliens.style.marginRight) + 1}px`
-            }else{
-                if( V.direction === 'left'){
-                    aliens.style.marginTop = `${parseInt(aliens.style.marginTop) + 20}px`
-                }
-                V.direction = 'right'
-            }
+            // if (V.direction === 'left' && parseInt(aliensDiv.style.marginLeft) > 0) {
+            //     aliensDiv.style.marginLeft = `${parseInt(aliensDiv.style.marginLeft) - 1}px`
+            //     aliensDiv.style.marginRight = `${parseInt(aliensDiv.style.marginRight) + 1}px`
+            // }else{
+            //     if( V.direction === 'left'){
+            //         aliensDiv.style.marginTop = `${parseInt(aliensDiv.style.marginTop) + 20}px`
+            //     }
+            //     V.direction = 'right'
+            // }
+
+            const missiles = document.querySelectorAll('.missile')
             if(missiles.length){
-                missiles.forEach(element => {
-                    let div = Array.from(document.querySelectorAll('.missile')).filter(missile => +missile.getAttribute('data-id') === element.id)
-                    if(element.y + 5 < 780){
-                        element.y = element.y + 5
-                        div[0].style.bottom = `${element.y}px`
-                    }else{
-                        C.removeMissile(element, div[0])
-                    }
+                missiles.forEach(missile => {
 
+                    const aliens = document.querySelectorAll('.alien_normal')
+                    aliens.forEach(alien => {
+                        if(!alien.classList.contains("disabled")){
+                            if(missile.getBoundingClientRect().top >= alien.getBoundingClientRect().top 
+                                && missile.getBoundingClientRect().top <= alien.getBoundingClientRect().top + 30
+                                && missile.getBoundingClientRect().left >= alien.getBoundingClientRect().left - 5
+                             && missile.getBoundingClientRect().left <= alien.getBoundingClientRect().left + 25) 
+                            {
+                                C.removeMissile(missile)
+                            }
+                        }   
+                    });
+                    if(parseInt(missile.style.bottom) + 5 < 780){
+                        missile.style.bottom = `${parseInt(missile.style.bottom) + 5}px`
+                    }else{
+                        C.removeMissile(missile)
+                        // C.removeAlien(alien, alienDiv[0])
+                    }
                 });
             }
             
-            V.step(missiles)
+            V.step()
         });
     },
 }
 
 var C = {
     init: function () {
-        for (let i = 0; i < 57; i++) {
+        for (let i = 0; i < 1; i++) {
             M.aliens.push(new Alien(i))
             V.displayAlien(i)
 
@@ -184,7 +194,7 @@ var C = {
         V.defineKeyUpEventListener()
 
         requestAnimationFrame(function () {
-            V.step(M.missiles)
+            V.step()
         });
     },
 
@@ -198,10 +208,19 @@ var C = {
         V.displayMissile(M.fighter, id)
     },
 
-    removeMissile : function (element, div){
-        V.removeMissile(div)
-        M.missiles.splice( M.missiles.indexOf(element), 1);
-    }
+    removeMissile : function (element){
+        V.removeMissile(element)
+
+        M.missiles.forEach(missile => {
+            if(missile.id === element.getAttribute('data-id')){
+                M.missiles.splice( M.missiles.indexOf(missile), 1);
+            }
+        })
+    },
+
+    // removeAlien : function(element , div){
+    //     element.
+    // }
 }
 
 C.init()
