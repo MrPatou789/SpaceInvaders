@@ -18,6 +18,11 @@ body {
   display: flex;
   flex-wrap: wrap;
   position: relative;
+  justify-content: center;
+}
+
+#aliens .disabled {
+  visibility: hidden;
 }
 
 .alien_normal {
@@ -43,4 +48,5 @@ body {
   width: 20px;
   height: auto;
 }
+
 

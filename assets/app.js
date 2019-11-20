@@ -117,6 +117,10 @@ var V = {
         game.removeChild(div)
     },
 
+    removeAlien : function(div){
+        div.classList.add('disabled')
+    },
+
     defineKeyUpEventListener : function(){
         document.addEventListener('keyup', e => {
             if(e.key === 'ArrowRight' || e.key === 'ArrowLeft'){
@@ -130,26 +134,26 @@ var V = {
 
     step : function () {
         requestAnimationFrame(function () {
-            // const aliensDiv = document.getElementById('aliens')
-            // if (V.direction === 'right' && parseInt(aliensDiv.style.marginRight) > 0) {
-            //     aliensDiv.style.marginLeft = `${parseInt(aliensDiv.style.marginLeft) + 1}px`
-            //     aliensDiv.style.marginRight = `${parseInt(aliensDiv.style.marginRight) - 1}px`
-            // }else{
-            //     if( V.direction === 'right'){
-            //         aliensDiv.style.marginTop = `${parseInt(aliensDiv.style.marginTop) + 20}px`
-            //     }
-            //     V.direction = 'left'
-            // }
+            const aliensDiv = document.getElementById('aliens')
+            if (V.direction === 'right' && parseInt(aliensDiv.style.marginRight) > 0) {
+                aliensDiv.style.marginLeft = `${parseInt(aliensDiv.style.marginLeft) + 1}px`
+                aliensDiv.style.marginRight = `${parseInt(aliensDiv.style.marginRight) - 1}px`
+            }else{
+                if( V.direction === 'right'){
+                    aliensDiv.style.marginTop = `${parseInt(aliensDiv.style.marginTop) + 20}px`
+                }
+                V.direction = 'left'
+            }
 
-            // if (V.direction === 'left' && parseInt(aliensDiv.style.marginLeft) > 0) {
-            //     aliensDiv.style.marginLeft = `${parseInt(aliensDiv.style.marginLeft) - 1}px`
-            //     aliensDiv.style.marginRight = `${parseInt(aliensDiv.style.marginRight) + 1}px`
-            // }else{
-            //     if( V.direction === 'left'){
-            //         aliensDiv.style.marginTop = `${parseInt(aliensDiv.style.marginTop) + 20}px`
-            //     }
-            //     V.direction = 'right'
-            // }
+            if (V.direction === 'left' && parseInt(aliensDiv.style.marginLeft) > 0) {
+                aliensDiv.style.marginLeft = `${parseInt(aliensDiv.style.marginLeft) - 1}px`
+                aliensDiv.style.marginRight = `${parseInt(aliensDiv.style.marginRight) + 1}px`
+            }else{
+                if( V.direction === 'left'){
+                    aliensDiv.style.marginTop = `${parseInt(aliensDiv.style.marginTop) + 20}px`
+                }
+                V.direction = 'right'
+            }
 
             const missiles = document.querySelectorAll('.missile')
             if(missiles.length){
@@ -164,6 +168,7 @@ var V = {
                              && missile.getBoundingClientRect().left <= alien.getBoundingClientRect().left + 25) 
                             {
                                 C.removeMissile(missile)
+                                C.removeAlien(alien)
                             }
                         }   
                     });
@@ -171,7 +176,6 @@ var V = {
                         missile.style.bottom = `${parseInt(missile.style.bottom) + 5}px`
                     }else{
                         C.removeMissile(missile)
-                        // C.removeAlien(alien, alienDiv[0])
                     }
                 });
             }
@@ -183,10 +187,9 @@ var V = {
 
 var C = {
     init: function () {
-        for (let i = 0; i < 1; i++) {
+        for (let i = 0; i < 70; i++) {
             M.aliens.push(new Alien(i))
             V.displayAlien(i)
-
         }
 
         M.fighter = new Fighter()
@@ -214,13 +217,20 @@ var C = {
         M.missiles.forEach(missile => {
             if(missile.id === element.getAttribute('data-id')){
                 M.missiles.splice( M.missiles.indexOf(missile), 1);
+                return
             }
         })
     },
 
-    // removeAlien : function(element , div){
-    //     element.
-    // }
+    removeAlien : function(element){
+        V.removeAlien(element)
+        M.aliens.forEach(alien => {
+            if (alien.id === element.getAttribute('data-id')) {
+                alien.status = false
+                return 
+            }
+        })
+    }
 }
 
 C.init()
