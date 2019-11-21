@@ -45,6 +45,10 @@ body {
 
 .missile{
   position: absolute;
+
+}
+
+.missile img{
   width: 20px;
   height: auto;
 }

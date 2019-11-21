@@ -75,7 +75,7 @@ var M = {
 
 var V = {
     direction: 'right',
-    click : 'true',
+    click: 'true',
 
     displayAlien: function (id) {
         const aliens = document.getElementById('aliens')
@@ -103,14 +103,17 @@ var V = {
 
     displayMissile: function (fighter, id) {
         const game = document.getElementById('game')
-        const img = document.createElement('img')
-        img.classList.add('missile')
-        img.setAttribute('data-id', id)
-        img.style.left = `${fighter.x + 5}px`
-        img.style.bottom = '28px'
-        img.src = './assets/images/missile.png'
+        const template = document.getElementById('missile')
+        const clone = document.importNode(template.content, true);
+        const div = clone.querySelector("div")
 
-        game.appendChild(img)
+        div.setAttribute('data-id', id)
+        div.style.left = `${fighter.x + 5}px`
+        div.style.bottom = '28px'
+
+
+
+        game.appendChild(clone)
     },
 
     removeMissile: function (div) {
@@ -125,13 +128,13 @@ var V = {
     defineKeyUpEventListener: function () {
         document.addEventListener('keyup', e => {
             if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
-                    C.movefighter(e.key)
+                C.movefighter(e.key)
             }
             if (e.key === 'ArrowUp') {
-                if(V.click){
+                if (V.click) {
                     C.addMissile()
                     V.click = false;
-                    setTimeout(function(){
+                    setTimeout(function () {
                         V.click = true
                     }, 800)
                 }
@@ -166,9 +169,9 @@ var V = {
             if (missiles.length) {
                 missiles.forEach(missile => {
 
-                    const aliens = document.querySelectorAll('.alien_normal')
+                    let aliens = document.querySelectorAll('.alien_normal')
+                    aliens = Array.from(aliens).filter(alien => !alien.classList.contains("disabled"))
                     aliens.forEach(alien => {
-                        if (!alien.classList.contains("disabled")) {
                             if (missile.getBoundingClientRect().top >= alien.getBoundingClientRect().top
                                 && missile.getBoundingClientRect().top <= alien.getBoundingClientRect().top + 30
                                 && missile.getBoundingClientRect().left >= alien.getBoundingClientRect().left - 5
@@ -176,9 +179,10 @@ var V = {
 
                                 C.removeMissile(missile)
                                 C.removeAlien(alien)
+                                return
                             }
-                        }
                     });
+
                     if (parseInt(missile.style.bottom) + 5 < 780) {
                         missile.style.bottom = `${parseInt(missile.style.bottom) + 5}px`
                     } else {
