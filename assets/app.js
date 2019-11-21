@@ -111,7 +111,8 @@ var V = {
         div.style.left = `${fighter.x + 5}px`
         div.style.bottom = '28px'
 
-
+        const sound = document.getElementById('laser_sound')
+        sound.play()
 
         game.appendChild(clone)
     },
@@ -123,6 +124,10 @@ var V = {
 
     removeAlien: function (div) {
         div.classList.add('disabled')
+        
+        const sound = document.getElementById('alien_explosion_sound')
+        sound.volume = 0.1
+        sound.play()
     },
 
     defineKeyUpEventListener: function () {
