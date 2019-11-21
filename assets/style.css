@@ -12,6 +12,7 @@ body {
   position: relative;
   height: 780px;
   width: 1024px;
+  background-color: #121212;
 }
 
 #aliens {

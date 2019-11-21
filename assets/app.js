@@ -148,8 +148,13 @@ var V = {
     },
 
     step: function () {
-        requestAnimationFrame(function () {
+        C.setAnimationFrame( requestAnimationFrame(function () {
+            let stop = false
+            const missiles = document.querySelectorAll('.missile')
+            let aliens = document.querySelectorAll('.alien_normal')
+            aliens = Array.from(aliens).filter(alien => !alien.classList.contains("disabled"))
             const aliensDiv = document.getElementById('aliens')
+            
             if (V.direction === 'right' && parseInt(aliensDiv.style.marginRight) > 0) {
                 aliensDiv.style.marginLeft = `${parseInt(aliensDiv.style.marginLeft) + 1}px`
                 aliensDiv.style.marginRight = `${parseInt(aliensDiv.style.marginRight) - 1}px`
@@ -170,12 +175,8 @@ var V = {
                 V.direction = 'right'
             }
 
-            const missiles = document.querySelectorAll('.missile')
             if (missiles.length) {
                 missiles.forEach(missile => {
-
-                    let aliens = document.querySelectorAll('.alien_normal')
-                    aliens = Array.from(aliens).filter(alien => !alien.classList.contains("disabled"))
                     aliens.forEach(alien => {
                             if (missile.getBoundingClientRect().top >= alien.getBoundingClientRect().top
                                 && missile.getBoundingClientRect().top <= alien.getBoundingClientRect().top + 30
@@ -187,6 +188,7 @@ var V = {
                                 return
                             }
                     });
+                    let stop = false
 
                     if (parseInt(missile.style.bottom) + 5 < 780) {
                         missile.style.bottom = `${parseInt(missile.style.bottom) + 5}px`
@@ -196,17 +198,29 @@ var V = {
                 });
             }
 
-            V.step()
-        });
+            aliens.forEach(alien => {
+                if(alien.getBoundingClientRect().top >= 880){
+                    C.cancelAnimationFrame()
+                    stop = true
+                }
+            });
+
+            if(!stop){
+                V.step()
+            }
+
+        }));
     },
 }
 
 var C = {
+    animationFrame : null,
+
     init: function () {
-        for (let i = 0; i < 70; i++) {
+        for (let i = 0; i < 57; i++) {
             M.aliens.push(new Alien(i))
             V.displayAlien(i)
-        }
+        } 
 
         M.fighter = new Fighter()
 
@@ -246,7 +260,17 @@ var C = {
                 return
             }
         })
+    },
+
+    setAnimationFrame : function(animationFrame){
+        C.animationFrame = animationFrame
+    },
+
+    cancelAnimationFrame : function(){
+        // console.log(C.animationFrame)
+        cancelAnimationFrame(C.animationFrame)
     }
 }
 
 C.init()
+V.step()
