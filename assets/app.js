@@ -70,11 +70,12 @@ var M = {
     fighter: null,
     aliens: [],
     missiles: [],
-    indexMissiles : 0,
+    indexMissiles: 0,
 }
 
 var V = {
-    direction : 'right',
+    direction: 'right',
+    click : 'true',
 
     displayAlien: function (id) {
         const aliens = document.getElementById('aliens')
@@ -86,21 +87,21 @@ var V = {
         aliens.appendChild(clone);
     },
 
-    movefighter: function(key, spaceship){
-            const element = document.getElementById('fighter')
-            if(key === 'ArrowRight'){
-                if(spaceship.x + 15 < 1024){
-                    spaceship.x += 15
-                }
-            }else{
-                if(spaceship.x - 15 > 0){
-                    spaceship.x -= 15
-                }
+    movefighter: function (key, spaceship) {
+        const element = document.getElementById('fighter')
+        if (key === 'ArrowRight') {
+            if (spaceship.x + 15 < 1024) {
+                spaceship.x += 15
             }
-            element.style.left = `${spaceship.x}px`
+        } else {
+            if (spaceship.x - 15 > 0) {
+                spaceship.x -= 15
+            }
+        }
+        element.style.left = `${spaceship.x}px`
     },
 
-    displayMissile : function(fighter, id){
+    displayMissile: function (fighter, id) {
         const game = document.getElementById('game')
         const img = document.createElement('img')
         img.classList.add('missile')
@@ -112,34 +113,40 @@ var V = {
         game.appendChild(img)
     },
 
-    removeMissile : function(div){
+    removeMissile: function (div) {
         const game = document.getElementById('game')
         game.removeChild(div)
     },
 
-    removeAlien : function(div){
+    removeAlien: function (div) {
         div.classList.add('disabled')
     },
 
-    defineKeyUpEventListener : function(){
+    defineKeyUpEventListener: function () {
         document.addEventListener('keyup', e => {
-            if(e.key === 'ArrowRight' || e.key === 'ArrowLeft'){
-                C.movefighter(e.key)
+            if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
+                    C.movefighter(e.key)
             }
-            if(e.key === 'ArrowUp'){
-                C.addMissile()
+            if (e.key === 'ArrowUp') {
+                if(V.click){
+                    C.addMissile()
+                    V.click = false;
+                    setTimeout(function(){
+                        V.click = true
+                    }, 800)
+                }
             }
         })
     },
 
-    step : function () {
+    step: function () {
         requestAnimationFrame(function () {
             const aliensDiv = document.getElementById('aliens')
             if (V.direction === 'right' && parseInt(aliensDiv.style.marginRight) > 0) {
                 aliensDiv.style.marginLeft = `${parseInt(aliensDiv.style.marginLeft) + 1}px`
                 aliensDiv.style.marginRight = `${parseInt(aliensDiv.style.marginRight) - 1}px`
-            }else{
-                if( V.direction === 'right'){
+            } else {
+                if (V.direction === 'right') {
                     aliensDiv.style.marginTop = `${parseInt(aliensDiv.style.marginTop) + 20}px`
                 }
                 V.direction = 'left'
@@ -148,38 +155,38 @@ var V = {
             if (V.direction === 'left' && parseInt(aliensDiv.style.marginLeft) > 0) {
                 aliensDiv.style.marginLeft = `${parseInt(aliensDiv.style.marginLeft) - 1}px`
                 aliensDiv.style.marginRight = `${parseInt(aliensDiv.style.marginRight) + 1}px`
-            }else{
-                if( V.direction === 'left'){
+            } else {
+                if (V.direction === 'left') {
                     aliensDiv.style.marginTop = `${parseInt(aliensDiv.style.marginTop) + 20}px`
                 }
                 V.direction = 'right'
             }
 
             const missiles = document.querySelectorAll('.missile')
-            if(missiles.length){
+            if (missiles.length) {
                 missiles.forEach(missile => {
 
                     const aliens = document.querySelectorAll('.alien_normal')
                     aliens.forEach(alien => {
-                        if(!alien.classList.contains("disabled")){
-                            if(missile.getBoundingClientRect().top >= alien.getBoundingClientRect().top 
+                        if (!alien.classList.contains("disabled")) {
+                            if (missile.getBoundingClientRect().top >= alien.getBoundingClientRect().top
                                 && missile.getBoundingClientRect().top <= alien.getBoundingClientRect().top + 30
                                 && missile.getBoundingClientRect().left >= alien.getBoundingClientRect().left - 5
-                             && missile.getBoundingClientRect().left <= alien.getBoundingClientRect().left + 25) 
-                            {
+                                && missile.getBoundingClientRect().left <= alien.getBoundingClientRect().left + 25) {
+
                                 C.removeMissile(missile)
                                 C.removeAlien(alien)
                             }
-                        }   
+                        }
                     });
-                    if(parseInt(missile.style.bottom) + 5 < 780){
+                    if (parseInt(missile.style.bottom) + 5 < 780) {
                         missile.style.bottom = `${parseInt(missile.style.bottom) + 5}px`
-                    }else{
+                    } else {
                         C.removeMissile(missile)
                     }
                 });
             }
-            
+
             V.step()
         });
     },
@@ -201,33 +208,33 @@ var C = {
         });
     },
 
-    movefighter : function(key){
-        V.movefighter(key , M.fighter)
+    movefighter: function (key) {
+        V.movefighter(key, M.fighter)
     },
 
-    addMissile : function (){
+    addMissile: function () {
         const id = M.indexMissiles++
         M.missiles.push(new Missile(id, M.fighter.x + 5))
         V.displayMissile(M.fighter, id)
     },
 
-    removeMissile : function (element){
+    removeMissile: function (element) {
         V.removeMissile(element)
 
         M.missiles.forEach(missile => {
-            if(missile.id === element.getAttribute('data-id')){
-                M.missiles.splice( M.missiles.indexOf(missile), 1);
+            if (missile.id === element.getAttribute('data-id')) {
+                M.missiles.splice(M.missiles.indexOf(missile), 1);
                 return
             }
         })
     },
 
-    removeAlien : function(element){
+    removeAlien: function (element) {
         V.removeAlien(element)
         M.aliens.forEach(alien => {
             if (alien.id === element.getAttribute('data-id')) {
                 alien.status = false
-                return 
+                return
             }
         })
     }
