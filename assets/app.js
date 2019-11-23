@@ -1,9 +1,8 @@
 class UFO {
-    constructor() {
-        this._id = null,
-            this._x = null,
-            this._y = null,
-            this._status = true
+    constructor(x, y) {
+        this._x = x
+        this._y = y
+        this._status = true
     }
 
     get id() {
@@ -14,12 +13,6 @@ class UFO {
     }
     get y() {
         return this._y
-    }
-    get height() {
-        return this._height
-    }
-    get width() {
-        return this._width
     }
     get status() {
         return this._status
@@ -32,36 +25,26 @@ class UFO {
     set y(y) {
         return this._y = y
     }
-    set height(height) {
-        return this._height = height
-    }
-    set width(width) {
-        return this._width = width
-    }
     set status(status) {
         return this._status = status
     }
 }
 
 class Alien extends UFO {
-    constructor(id) {
-        super()
-        this._id = id
+    constructor(x, y) {
+        super(x, y)
     }
 }
 
 class Fighter extends UFO {
-    constructor() {
-        super()
-        this._y = 780
-        this._x = 512
+    constructor(x, y) {
+        super(x, y)
     }
 }
 
 class Missile extends UFO {
-    constructor(id, x) {
-        super()
-        this._id = id
+    constructor(x, y) {
+        super(x, y)
     }
 }
 
@@ -70,207 +53,84 @@ var M = {
     fighter: null,
     aliens: [],
     missiles: [],
-    indexMissiles: 0,
 }
 
 var V = {
-    direction: 'right',
-    click: 'true',
-
-    displayAlien: function (id) {
-        const aliens = document.getElementById('aliens')
-        const template = document.getElementById('alien')
-        const clone = document.importNode(template.content, true);
-        const div = clone.querySelector("div")
-        div.setAttribute('data-id', id)
-
-        aliens.appendChild(clone);
-    },
-
-    movefighter: function (key, spaceship) {
-        const element = document.getElementById('fighter')
-        if (key === 'ArrowRight') {
-            if (spaceship.x + 15 < 1024) {
-                spaceship.x += 15
-            }
-        } else {
-            if (spaceship.x - 15 > 0) {
-                spaceship.x -= 15
-            }
-        }
-        element.style.left = `${spaceship.x}px`
-    },
-
-    displayMissile: function (fighter, id) {
-        const game = document.getElementById('game')
-        const template = document.getElementById('missile')
-        const clone = document.importNode(template.content, true);
-        const div = clone.querySelector("div")
-
-        div.setAttribute('data-id', id)
-        div.style.left = `${fighter.x + 5}px`
-        div.style.bottom = '28px'
-
-        const sound = document.getElementById('laser_sound')
-        sound.play()
-
-        game.appendChild(clone)
-    },
-
-    removeMissile: function (div) {
-        const game = document.getElementById('game')
-        game.removeChild(div)
-    },
-
-    removeAlien: function (div) {
-        div.classList.add('disabled')
-        
-        const sound = document.getElementById('alien_explosion_sound')
-        sound.volume = 0.1
-        sound.play()
-    },
-
-    defineKeyUpEventListener: function () {
-        document.addEventListener('keyup', e => {
-            if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
-                C.movefighter(e.key)
-            }
-            if (e.key === 'ArrowUp') {
-                if (V.click) {
-                    C.addMissile()
-                    V.click = false;
-                    setTimeout(function () {
-                        V.click = true
-                    }, 800)
-                }
-            }
-        })
-    },
+    fighterTemplate: new Image(),
+    alien: new Image(),
+    missileTemplate: new Image(),
 
     step: function () {
-        C.setAnimationFrame( requestAnimationFrame(function () {
-            let stop = false
-            const missiles = document.querySelectorAll('.missile')
-            let aliens = document.querySelectorAll('.alien_normal')
-            aliens = Array.from(aliens).filter(alien => !alien.classList.contains("disabled"))
-            const aliensDiv = document.getElementById('aliens')
-            
-            if (V.direction === 'right' && parseInt(aliensDiv.style.marginRight) > 0) {
-                aliensDiv.style.marginLeft = `${parseInt(aliensDiv.style.marginLeft) + 1}px`
-                aliensDiv.style.marginRight = `${parseInt(aliensDiv.style.marginRight) - 1}px`
-            } else {
-                if (V.direction === 'right') {
-                    aliensDiv.style.marginTop = `${parseInt(aliensDiv.style.marginTop) + 20}px`
-                }
-                V.direction = 'left'
-            }
+        requestAnimationFrame(function () {
+            const ctx = document.getElementById('game').getContext('2d');
+            const aliens = C.getAliens()
 
-            if (V.direction === 'left' && parseInt(aliensDiv.style.marginLeft) > 0) {
-                aliensDiv.style.marginLeft = `${parseInt(aliensDiv.style.marginLeft) - 1}px`
-                aliensDiv.style.marginRight = `${parseInt(aliensDiv.style.marginRight) + 1}px`
-            } else {
-                if (V.direction === 'left') {
-                    aliensDiv.style.marginTop = `${parseInt(aliensDiv.style.marginTop) + 20}px`
-                }
-                V.direction = 'right'
-            }
-
-            if (missiles.length) {
-                missiles.forEach(missile => {
-                    aliens.forEach(alien => {
-                            if (missile.getBoundingClientRect().top >= alien.getBoundingClientRect().top
-                                && missile.getBoundingClientRect().top <= alien.getBoundingClientRect().top + 30
-                                && missile.getBoundingClientRect().left >= alien.getBoundingClientRect().left - 5
-                                && missile.getBoundingClientRect().left <= alien.getBoundingClientRect().left + 25) {
-
-                                C.removeMissile(missile)
-                                C.removeAlien(alien)
-                                return
-                            }
-                    });
-                    let stop = false
-
-                    if (parseInt(missile.style.bottom) + 5 < 780) {
-                        missile.style.bottom = `${parseInt(missile.style.bottom) + 5}px`
-                    } else {
-                        C.removeMissile(missile)
-                    }
-                });
-            }
+            ctx.globalCompositeOperation = 'destination-over';
+            ctx.canvas.width = 1024;
+            ctx.canvas.height = 780;
+            ctx.clearRect(0, 0, ctx.witdh, ctx.height);
 
             aliens.forEach(alien => {
-                if(alien.getBoundingClientRect().top >= 880){
-                    C.cancelAnimationFrame()
-                    stop = true
-                }
+                ctx.drawImage(V.alien, alien.x, alien.y, 35, 35);
             });
 
-            if(!stop){
-                V.step()
-            }
+            C.setAliens()
+            V.step()
+        })
+    }
 
-        }));
-    },
 }
 
 var C = {
-    animationFrame : null,
+    direction: 'right',
 
     init: function () {
-        for (let i = 0; i < 57; i++) {
-            M.aliens.push(new Alien(i))
-            V.displayAlien(i)
-        } 
+        V.alien.src = `${location.pathname}/../assets/images/alien.svg`
 
-        M.fighter = new Fighter()
+        M.fighter = new Fighter(512, 780)
 
-        V.defineKeyUpEventListener()
+        let x = 260
+        let y = 100
 
-        requestAnimationFrame(function () {
-            V.step()
-        });
-    },
+        for (let i = 0; i < 33; i++) {
+            M.aliens.push(new Alien(x, y))
 
-    movefighter: function (key) {
-        V.movefighter(key, M.fighter)
-    },
-
-    addMissile: function () {
-        const id = M.indexMissiles++
-        M.missiles.push(new Missile(id, M.fighter.x + 5))
-        V.displayMissile(M.fighter, id)
-    },
-
-    removeMissile: function (element) {
-        V.removeMissile(element)
-
-        M.missiles.forEach(missile => {
-            if (missile.id === element.getAttribute('data-id')) {
-                M.missiles.splice(M.missiles.indexOf(missile), 1);
-                return
+            if ((x += 50) >= 764) {
+                x = 260
+                y += 40
             }
-        })
+        }
+        C.setAliens()
+        V.step()
     },
 
-    removeAlien: function (element) {
-        V.removeAlien(element)
+    getAliens: function () {
+        return [...M.aliens]
+    },
+
+    setAliens: function () {
+        let down = false
+        let x = 0
+        C.direction === 'left' ? x = -1 : x = 1
+
         M.aliens.forEach(alien => {
-            if (alien.id === element.getAttribute('data-id')) {
-                alien.status = false
-                return
+            let alienX = alien.x
+            if ((alienX += x) >= 1024 - 35 || (alienX += x) <= 0) {
+                C.direction === 'left' ? C.direction = 'right' : C.direction = 'left'
+                down = true
             }
+        });
+
+        M.aliens.forEach(alien => {
+            down ? alien.y += 40 : null
+            alien.x += x
         })
     },
 
-    setAnimationFrame : function(animationFrame){
-        C.animationFrame = animationFrame
-    },
+    getAlien: function () {
 
-    cancelAnimationFrame : function(){
-        // console.log(C.animationFrame)
-        cancelAnimationFrame(C.animationFrame)
     }
 }
 
 C.init()
-V.step()
+
