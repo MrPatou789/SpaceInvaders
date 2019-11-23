@@ -62,6 +62,10 @@ var V = {
             if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
                 C.setFighter(e.key)
             }
+
+            if (e.key === 'ArrowUp') {
+                C.addMissile()
+            }
         })
     },
 
@@ -70,6 +74,7 @@ var V = {
             const ctx = document.getElementById('game').getContext('2d');
             const aliens = C.getAliens()
             const fighter = C.getFighter()
+            const misiles = C.getMissiles()
 
             ctx.globalCompositeOperation = 'destination-over';
             ctx.canvas.width = 1024;
@@ -82,7 +87,12 @@ var V = {
 
             ctx.drawImage(V.fighter, fighter.x, fighter.y, 30, 30)
 
+            misiles.forEach(missile => {
+                ctx.drawImage(V.missile, missile.x, missile.y, 20, 30)
+            })
+
             C.setAliens()
+            C.setMisiles()
             V.step()
         })
     }
@@ -95,6 +105,7 @@ var C = {
     init: function () {
         V.alien.src = `${location.pathname}/../assets/images/alien.svg`
         V.fighter.src = `${location.pathname}/../assets/images/fighter.svg`
+        V.missile.src = `${location.pathname}/../assets/images/missile.png`
         V.defineKeyUpEventListener()
 
         M.fighter = new Fighter(512, 780 - 40)
@@ -154,6 +165,36 @@ var C = {
                 fighter.x -= 15
             }
         }
+    },
+
+    addMissile: function () {
+        const fighter = M.fighter
+        M.missiles.push(new Missile(fighter.x + 5, fighter.y - 30))
+    },
+
+    getMissiles: function () {
+        return [...M.missiles]
+    },
+
+    setMisiles: function () {
+        M.missiles.forEach(missile => {
+            missile.y -= 5
+        })
+        M.missiles = M.missiles.filter(missile => {
+            let saveMissile = true
+            missile.y <= 0 ? saveMissile = false : null
+
+            M.aliens = M.aliens.filter(alien => {
+                let saveAlien = true
+                if (missile.y >= alien.y && missile.y <= alien.y + 30 && missile.x >= alien.x && missile.x <= alien.x + 30) {
+                    saveMissile = false
+                    saveAlien = false
+                }
+                return saveAlien
+            })
+
+            return saveMissile
+        })
     }
 }
 
