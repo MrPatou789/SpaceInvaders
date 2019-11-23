@@ -93,14 +93,22 @@ var V = {
 
             C.setAliens()
             C.setMisiles()
-            V.step()
+
+            if (!C.cancelAnimationFrame()) {
+                V.step()
+            }
         })
+    },
+
+    displayEndGame(message){
+        document.getElementById('game_end').innerHTML = message
     }
 
 }
 
 var C = {
     direction: 'right',
+    cancelAnimationFrameBoolean: false,
 
     init: function () {
         V.alien.src = `${location.pathname}/../assets/images/alien.svg`
@@ -125,6 +133,10 @@ var C = {
         V.step()
     },
 
+    cancelAnimationFrame: function () {
+        return C.cancelAnimationFrameBoolean
+    },
+
     getAliens: function () {
         return [...M.aliens]
     },
@@ -132,20 +144,33 @@ var C = {
     setAliens: function () {
         let down = false
         let x = 0
-        
-        for (let i = 0; i < M.aliens.length; i++) {
-            if (M.aliens[i].x + x >= 1024 - 35 || M.aliens[i].x + x <= 0) {
-                C.direction === 'left' ? C.direction = 'right' : C.direction = 'left'
-                down = true
-                break
+
+        if (M.aliens.length !== 0) {
+            for (let i = 0; i < M.aliens.length; i++) {
+                if (M.aliens[i].x + x >= 1024 - 35 || M.aliens[i].x + x <= 0) {
+                    C.direction === 'left' ? C.direction = 'right' : C.direction = 'left'
+                    down = true
+                    break
+                }
+
+                if (M.aliens[i].y >= M.fighter.y) {
+                    //Defeat
+                    C.cancelAnimationFrameBoolean = true
+                    V.displayEndGame('you lose')
+                }
             }
+
+            C.direction === 'left' ? x = -1 : x = 1
+            M.aliens.forEach(alien => {
+                down ? alien.y += 40 : null
+                alien.x += x
+            })
+        }else{
+            ///Victory
+            C.cancelAnimationFrameBoolean = true
+            V.displayEndGame('you win')
         }
 
-        C.direction === 'left' ? x = -1 : x = 1
-        M.aliens.forEach(alien => {
-            down ? alien.y += 40 : null
-            alien.x += x
-        })
 
     },
 
@@ -196,7 +221,7 @@ var C = {
             })
             return saveMissile
         })
-    }
+    },
 }
 
 C.init()
