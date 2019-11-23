@@ -56,15 +56,22 @@ var V = {
     fighter: new Image(),
     alien: new Image(),
     missile: new Image(),
+    click : true,
 
     defineKeyUpEventListener: function () {
-        document.addEventListener('keyup', e => {
+        document.addEventListener('keydown', e => {
             if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
                 C.setFighter(e.key)
             }
 
             if (e.key === 'ArrowUp') {
-                C.addMissile()
+                if (V.click) {
+                    C.addMissile()
+                    V.click = false;
+                    setTimeout(function () {
+                        V.click = true
+                    }, 600)
+                }
             }
         })
     },
