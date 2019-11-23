@@ -132,19 +132,21 @@ var C = {
     setAliens: function () {
         let down = false
         let x = 0
-        C.direction === 'left' ? x = -1 : x = 1
-
-        M.aliens.forEach(alien => {
-            if (alien.x + x >= 1024 - 35 || alien.x + x <= 0) {
+        
+        for (let i = 0; i < M.aliens.length; i++) {
+            if (M.aliens[i].x + x >= 1024 - 35 || M.aliens[i].x + x <= 0) {
                 C.direction === 'left' ? C.direction = 'right' : C.direction = 'left'
                 down = true
+                break
             }
-        });
+        }
 
+        C.direction === 'left' ? x = -1 : x = 1
         M.aliens.forEach(alien => {
             down ? alien.y += 40 : null
             alien.x += x
         })
+
     },
 
     getFighter: function () {
@@ -192,7 +194,6 @@ var C = {
                 }
                 return saveAlien
             })
-
             return saveMissile
         })
     }
