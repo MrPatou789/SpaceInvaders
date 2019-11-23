@@ -5,9 +5,6 @@ class UFO {
         this._status = true
     }
 
-    get id() {
-        return this._id
-    }
     get x() {
         return this._x
     }
@@ -56,14 +53,23 @@ var M = {
 }
 
 var V = {
-    fighterTemplate: new Image(),
+    fighter: new Image(),
     alien: new Image(),
-    missileTemplate: new Image(),
+    missile: new Image(),
+
+    defineKeyUpEventListener: function () {
+        document.addEventListener('keyup', e => {
+            if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
+                C.setFighter(e.key)
+            }
+        })
+    },
 
     step: function () {
         requestAnimationFrame(function () {
             const ctx = document.getElementById('game').getContext('2d');
             const aliens = C.getAliens()
+            const fighter = C.getFighter()
 
             ctx.globalCompositeOperation = 'destination-over';
             ctx.canvas.width = 1024;
@@ -73,6 +79,8 @@ var V = {
             aliens.forEach(alien => {
                 ctx.drawImage(V.alien, alien.x, alien.y, 35, 35);
             });
+
+            ctx.drawImage(V.fighter, fighter.x, fighter.y, 30, 30)
 
             C.setAliens()
             V.step()
@@ -86,8 +94,10 @@ var C = {
 
     init: function () {
         V.alien.src = `${location.pathname}/../assets/images/alien.svg`
+        V.fighter.src = `${location.pathname}/../assets/images/fighter.svg`
+        V.defineKeyUpEventListener()
 
-        M.fighter = new Fighter(512, 780)
+        M.fighter = new Fighter(512, 780 - 40)
 
         let x = 260
         let y = 100
@@ -114,8 +124,7 @@ var C = {
         C.direction === 'left' ? x = -1 : x = 1
 
         M.aliens.forEach(alien => {
-            let alienX = alien.x
-            if ((alienX += x) >= 1024 - 35 || (alienX += x) <= 0) {
+            if (alien.x + x >= 1024 - 35 || alien.x + x <= 0) {
                 C.direction === 'left' ? C.direction = 'right' : C.direction = 'left'
                 down = true
             }
@@ -127,8 +136,24 @@ var C = {
         })
     },
 
-    getAlien: function () {
+    getFighter: function () {
+        return {
+            x: M.fighter.x,
+            y: M.fighter.y
+        }
+    },
 
+    setFighter: function (key) {
+        const fighter = M.fighter
+        if (key === 'ArrowRight') {
+            if (fighter.x + 15 < 1024 - 30) {
+                fighter.x += 15
+            }
+        } else {
+            if (fighter.x - 15 > 0) {
+                fighter.x -= 15
+            }
+        }
     }
 }
 
