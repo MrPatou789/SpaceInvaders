@@ -2,7 +2,6 @@ class UFO {
     constructor(x, y) {
         this._x = x
         this._y = y
-        this._status = true
     }
 
     get x() {
@@ -11,10 +10,6 @@ class UFO {
     get y() {
         return this._y
     }
-    get status() {
-        return this._status
-    }
-
 
     set x(x) {
         return this._x = x
@@ -22,13 +17,16 @@ class UFO {
     set y(y) {
         return this._y = y
     }
-    set status(status) {
-        return this._status = status
-    }
 }
 
 class Alien extends UFO {
     constructor(x, y) {
+        super(x, y)
+    }
+}
+
+class MotherShip extends Alien {
+    constructor(x, y){
         super(x, y)
     }
 }
@@ -45,7 +43,6 @@ class Missile extends UFO {
     }
 }
 
-
 var M = {
     fighter: null,
     aliens: [],
@@ -56,6 +53,8 @@ var V = {
     fighter: new Image(),
     alien: new Image(),
     missile: new Image(),
+    mothership : new Image(),
+
     click : true,
 
     defineKeyUpEventListener: function () {
@@ -89,7 +88,11 @@ var V = {
             ctx.clearRect(0, 0, ctx.witdh, ctx.height);
 
             aliens.forEach(alien => {
-                ctx.drawImage(V.alien, alien.x, alien.y, 35, 35);
+                if (alien instanceof MotherShip) {
+                    ctx.drawImage(V.mothership, alien.x, alien.y, 70, 70);
+                }else{
+                    ctx.drawImage(V.alien, alien.x, alien.y, 35, 35);
+                }
             });
 
             ctx.drawImage(V.fighter, fighter.x, fighter.y, 30, 30)
@@ -121,9 +124,11 @@ var C = {
         V.alien.src = `${location.pathname}/../assets/images/alien.svg`
         V.fighter.src = `${location.pathname}/../assets/images/fighter.svg`
         V.missile.src = `${location.pathname}/../assets/images/missile.png`
+        V.mothership.src = `${location.pathname}/../assets/images/mothership.png`
         V.defineKeyUpEventListener()
 
         M.fighter = new Fighter(512, 780 - 40)
+        M.aliens.push(new MotherShip(512, 0 - 15))
 
         let x = 260
         let y = 100
@@ -169,7 +174,9 @@ var C = {
 
             C.direction === 'left' ? x = -1 : x = 1
             M.aliens.forEach(alien => {
-                down ? alien.y += 40 : null
+                if(down && !(alien instanceof MotherShip)){
+                    alien.y += 40
+                }
                 alien.x += x
             })
         }else{
@@ -232,4 +239,3 @@ var C = {
 }
 
 C.init()
-
