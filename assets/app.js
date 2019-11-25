@@ -1,3 +1,5 @@
+//FIXME: Alien and missil collision
+
 class UFO {
     constructor(x, y) {
         this._x = x
@@ -26,7 +28,7 @@ class Alien extends UFO {
 }
 
 class MotherShip extends Alien {
-    constructor(x, y){
+    constructor(x, y) {
         super(x, y)
     }
 }
@@ -43,19 +45,27 @@ class Missile extends UFO {
     }
 }
 
+class Bomb extends UFO {
+    constructor(x, y) {
+        super(x, y)
+    }
+}
+
 var M = {
     fighter: null,
     aliens: [],
     missiles: [],
+    bombs: [],
 }
 
 var V = {
     fighter: new Image(),
     alien: new Image(),
     missile: new Image(),
-    mothership : new Image(),
+    mothership: new Image(),
+    bomb: new Image(),
 
-    click : true,
+    click: true,
 
     defineKeyUpEventListener: function () {
         document.addEventListener('keydown', e => {
@@ -81,6 +91,9 @@ var V = {
             const aliens = C.getAliens()
             const fighter = C.getFighter()
             const misiles = C.getMissiles()
+            const bombs = C.getBombs()
+
+            C.addBomb()
 
             ctx.globalCompositeOperation = 'destination-over';
             ctx.canvas.width = 1024;
@@ -90,7 +103,7 @@ var V = {
             aliens.forEach(alien => {
                 if (alien instanceof MotherShip) {
                     ctx.drawImage(V.mothership, alien.x, alien.y, 70, 70);
-                }else{
+                } else {
                     ctx.drawImage(V.alien, alien.x, alien.y, 35, 35);
                 }
             });
@@ -101,8 +114,13 @@ var V = {
                 ctx.drawImage(V.missile, missile.x, missile.y, 20, 30)
             })
 
+            bombs.forEach(bomb => {
+                ctx.drawImage(V.bomb, bomb.x, bomb.y, 20, 30)
+            })
+
             C.setAliens()
             C.setMisiles()
+            C.setBombs()
 
             if (!C.cancelAnimationFrame()) {
                 V.step()
@@ -110,7 +128,7 @@ var V = {
         })
     },
 
-    displayEndGame(message){
+    displayEndGame(message) {
         document.getElementById('game_end').innerHTML = message
     }
 
@@ -125,6 +143,7 @@ var C = {
         V.fighter.src = `${location.pathname}/../assets/images/fighter.svg`
         V.missile.src = `${location.pathname}/../assets/images/missile.png`
         V.mothership.src = `${location.pathname}/../assets/images/mothership.png`
+        V.bomb.src = `${location.pathname}/../assets/images/bomb.png`
         V.defineKeyUpEventListener()
 
         M.fighter = new Fighter(512, 780 - 40)
@@ -174,12 +193,12 @@ var C = {
 
             C.direction === 'left' ? x = -1 : x = 1
             M.aliens.forEach(alien => {
-                if(down && !(alien instanceof MotherShip)){
+                if (down && !(alien instanceof MotherShip)) {
                     alien.y += 40
                 }
                 alien.x += x
             })
-        }else{
+        } else {
             ///Victory
             C.cancelAnimationFrameBoolean = true
             V.displayEndGame('you win')
@@ -236,6 +255,33 @@ var C = {
             return saveMissile
         })
     },
+
+    addBomb: function () {
+        if (Math.floor(Math.random() * Math.floor(100 + 1) <= 1)) {
+            let mothership = M.aliens.filter(alien => alien instanceof MotherShip)
+            if (mothership.length) M.bombs.push(new Bomb(mothership[0].x + 20, mothership[0].y + 30))
+        }
+    },
+
+    getBombs: function () {
+        return [...M.bombs]
+    },
+
+    setBombs: function () {
+        M.bombs = M.bombs.filter(bomb => {
+            let saveBomb = true
+            let fighter = M.fighter
+            if ((bomb.y += 5) >= 780) saveBomb = false
+
+            if (bomb.y >= fighter.y && bomb.y <= fighter.y + 30 && bomb.x >= fighter.x - 10 && bomb.x <= fighter.x + 30) {
+                //Defeat
+                C.cancelAnimationFrameBoolean = true
+                V.displayEndGame('you lose')
+            }
+
+            return saveBomb
+        })
+    }
 }
 
 C.init()
