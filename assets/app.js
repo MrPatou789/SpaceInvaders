@@ -13,6 +13,10 @@ class UFO {
         return this._y
     }
 
+    get direction() {
+        return this._y
+    }
+
     set x(x) {
         return this._x = x
     }
@@ -25,6 +29,21 @@ class Alien extends UFO {
     constructor(x, y) {
         super(x, y)
     }
+
+    checkLimit() {
+        if (this._x >= 1024 - 35 || this._x <= 0) {
+            return true
+        }
+        return false
+    }
+
+    move(down, x) {
+        if (down && !(this instanceof MotherShip)) {
+            this._y += 40
+        }
+        this._x += x
+    }
+
 }
 
 class MotherShip extends Alien {
@@ -135,7 +154,7 @@ var V = {
 }
 
 var C = {
-    direction: 'right',
+    direction : 'right',
     cancelAnimationFrameBoolean: false,
 
     init: function () {
@@ -175,12 +194,18 @@ var C = {
     setAliens: function () {
         let down = false
         let x = 0
-
+        if (Math.floor(Math.random() * Math.floor(100 + 1) <= 1)) {
+            let random = Math.floor(Math.random() * Math.floor(M.aliens.length))
+            if( M.aliens[random] instanceof MotherShip) return
+            M.aliens[random].move = function(){
+                this._y += 2
+            }
+        }
         if (M.aliens.length !== 0) {
             for (let i = 0; i < M.aliens.length; i++) {
-                if (M.aliens[i].x + x >= 1024 - 35 || M.aliens[i].x + x <= 0) {
+                down = M.aliens[i].checkLimit()
+                if (down) {
                     C.direction === 'left' ? C.direction = 'right' : C.direction = 'left'
-                    down = true
                     break
                 }
 
@@ -190,13 +215,9 @@ var C = {
                     V.displayEndGame('you lose')
                 }
             }
-
             C.direction === 'left' ? x = -1 : x = 1
             M.aliens.forEach(alien => {
-                if (down && !(alien instanceof MotherShip)) {
-                    alien.y += 40
-                }
-                alien.x += x
+                alien.move(down, x)
             })
         } else {
             ///Victory
@@ -258,8 +279,8 @@ var C = {
 
     addBomb: function () {
         if (Math.floor(Math.random() * Math.floor(100 + 1) <= 1)) {
-            let mothership = M.aliens.filter(alien => alien instanceof MotherShip)
-            if (mothership.length) M.bombs.push(new Bomb(mothership[0].x + 20, mothership[0].y + 30))
+            let mothership = M.aliens.find(alien => alien instanceof MotherShip)
+            if (mothership) M.bombs.push(new Bomb(mothership.x + 20, mothership.y + 30))
         }
     },
 
