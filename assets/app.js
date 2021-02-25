@@ -28,6 +28,7 @@ class UFO {
 class Alien extends UFO {
     constructor(x, y) {
         super(x, y)
+        this._attacker = false
     }
 
     checkLimit() {
@@ -72,6 +73,7 @@ class Bomb extends UFO {
 
 var M = {
     fighter: null,
+    aliensAttacker : 0,
     aliens: [],
     missiles: [],
     bombs: [],
@@ -194,12 +196,14 @@ var C = {
     setAliens: function () {
         let down = false
         let x = 0
-        if (Math.floor(Math.random() * Math.floor(100 + 1) <= 1)) {
+        if (Math.floor(Math.random() * Math.floor(100 + 1) <= 1 && M.aliensAttacker < 2)) {
             let random = Math.floor(Math.random() * Math.floor(M.aliens.length))
             if( M.aliens[random] instanceof MotherShip) return
             M.aliens[random].move = function(){
-                this._y += 2
+                this._y += 1.25
             }
+            M.aliens[random].attacker = true
+            M.aliensAttacker += 1
         }
         if (M.aliens.length !== 0) {
             for (let i = 0; i < M.aliens.length; i++) {
@@ -270,6 +274,11 @@ var C = {
                 if (missile.y >= alien.y && missile.y <= alien.y + 30 && missile.x >= alien.x && missile.x <= alien.x + 30) {
                     saveMissile = false
                     saveAlien = false
+
+                    if(alien.attacker){
+                    	M.aliensAttacker -= 1
+                    }
+                    
                 }
                 return saveAlien
             })
